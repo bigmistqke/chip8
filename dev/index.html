@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="./index.css" />
+<canvas id="canvas"></canvas>
+<form>
+  <textarea placeholder="Enter Chip8 Assembly And Evaluate" id="textarea"></textarea>
+  <button id="submit">EVAL</button>
+</form>
+<script type="module">
+  import { WIDTH, HEIGHT, Chip8, Chip8WebGLRenderer, Chip8Audio, assemble } from '../src/index.ts'
+  textarea.value = `LD V0, 28 ; Set V0 (X coordinate) to 28 (middle of the screen width 64)
+LD V1, 13 ; Set V1 (Y coordinate) to 13 (middle of the screen height 32)
+LD I, 0x20A ; Set I to the memory address where the sprite data starts (e.g., 0x300)
+DRW V0, V1, 8 ; Draw the sprite at the coordinates specified in V0 and V1 (X and Y)
+JP 0x208 ; // Infinite loop to keep the display unchanged
+BD 0xFF
+BD 0xFF
+BD 0xFF
+BD 0xFF
+BD 0xFF
+BD 0xFF
+BD 0xFF
+BD 0xFF`
+
+  canvas.width = WIDTH * 4
+  canvas.height = HEIGHT * 4
+
+  function run(assembly) {
+    const chip8 = new Chip8(new Chip8WebGLRenderer(canvas), new Chip8Audio())
+
+    chip8.loadProgram(new Uint8Array(assemble(assembly)))
+
+    function loop() {
+      requestAnimationFrame(loop)
+      chip8.cycle()
+    }
+    loop()
+  }
+
+  submit.addEventListener('click', event => {
+    event.preventDefault()
+    run(textarea.value)
+  })
+</script>
